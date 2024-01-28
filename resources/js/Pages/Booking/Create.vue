@@ -5,34 +5,21 @@
   import { watch } from 'vue';
   import VueDatePicker from '@vuepic/vue-datepicker';
   import '@vuepic/vue-datepicker/dist/main.css';
+  import GuestLayout from "@/Layouts/GuestLayout.vue";
 
   const bookings = ref(null);
-  const date = ref(null);
+  const date = new Date();
+  date.setHours(date.getHours() + 1, 0,0,0);
 
   fetch('/api/bookings')
       .then(response => response.json())
       .then(data => bookings.value = data);
 
   watch(date, (newDate) => {
-    // refresh list result for given day
-    const query = newDate !== null ? '?date=' + formatDate(newDate) : '';
-    fetch('/api/bookings' + query)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-         bookings.value = data;
-        });
+    console.log(newDate);
   });
 
-  function formatDate(date) {
-    return [
-      date.getFullYear(),
-      date.getMonth() + 1,
-      date.getDate(),
-    ].join('-');
-  }
-
-  function displayDate(dateString) {
+  function formatDate(dateString) {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('default', { dateStyle: 'long', timeStyle: 'short' }).format(date);
   }
@@ -41,15 +28,14 @@
 <template>
   <Head title="All Bookings" />
 
-  <AuthenticatedLayout>
+  <GuestLayout>
 
     <div class="p-6">
       <h1 class="header">Upcoming Bookings</h1>
 
       <VueDatePicker
           v-model="date"
-          :enable-time-picker="false"
-          :clearable="true"
+          enable-time-picker="false"
       />
 
       <table>
@@ -64,13 +50,13 @@
           <tr v-for="booking in bookings">
             <td>{{ booking.name }}</td>
             <td>{{ booking.vehicle_make_model }}</td>
-            <td>{{ displayDate(booking.booking_datetime) }}</td>
+            <td>{{ formatDate(booking.booking_datetime) }}</td>
           </tr>
         </tbody>
       </table>
     </div>
 
-  </AuthenticatedLayout>
+  </GuestLayout>
 </template>
 
 <style scoped>
