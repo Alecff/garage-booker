@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Booking;
+use DateInterval;
 use DateTimeImmutable;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -12,7 +13,18 @@ class BookingController extends Controller
 {
     public function getBookings(Request $request): JsonResponse
     {
-        $bookings = Booking::all();
+        $query = $request->query();
+        if (!isset($query['date'])) {
+            $bookings = Booking::all();
+
+            return new JsonResponse($bookings);
+        }
+
+        $date = new DateTimeImmutable($query['date']);
+        // Fetch all bookings made on the given day
+        $bookings = Booking::where('booking_datetime', '>=', $date)
+            ->where('booking_datetime', '<', $date->add(DateInterval::createFromDateString('1 day')))
+            ->get();
 
         return new JsonResponse($bookings);
     }
