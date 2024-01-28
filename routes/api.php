@@ -14,6 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+
+Route::get('bookings', [\App\Http\Controllers\BookingController::class, 'getBookings']);
+Route::post('booking', [\App\Http\Controllers\BookingController::class, 'createBooking']);
