@@ -7,21 +7,30 @@
   import '@vuepic/vue-datepicker/dist/main.css';
   import GuestLayout from "@/Layouts/GuestLayout.vue";
 
-  const bookings = ref(null);
-  const date = new Date();
-  date.setHours(date.getHours() + 1, 0,0,0);
-
-  fetch('/api/bookings')
-      .then(response => response.json())
-      .then(data => bookings.value = data);
+  const date = ref(null);
+  const formData = {
+      name: '',
+      email: '',
+      phone_number: '',
+      vehicle_make_model: '',
+      booking_datetime: null,
+  };
 
   watch(date, (newDate) => {
-    console.log(newDate);
+    formData.booking_datetime = newDate.toISOString();
   });
 
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('default', { dateStyle: 'long', timeStyle: 'short' }).format(date);
+  function submit() {
+      fetch('/api/booking', {
+          method: 'POST',
+          body: JSON.stringify(formData),
+          headers: {
+              'Content-type': 'application/json; charset=UTF-8',
+          },
+      }).then(response => response.json())
+          .then(data => {
+              console.log(data);
+          });
   }
 </script>
 
@@ -30,30 +39,26 @@
 
   <GuestLayout>
 
-    <div class="p-6">
-      <h1 class="header">Upcoming Bookings</h1>
+    <div class="booking-form">
+      <h1 class="header">Book a Slot</h1>
 
-      <VueDatePicker
-          v-model="date"
-          enable-time-picker="false"
-      />
+        <span class="datepicker">
+            <VueDatePicker
+                v-model="date"
+                minutes-increment="30"
+                minutes-grid-increment="30"
+                :max-time="{ hours:17, minutes: 30 }"
+                :min-time="{ hours:9, minutes: 0 }"
+                placeholder="Select Date and Time"
+                :start-time="{hours: 12, minutes: 0}"
+            />
+        </span>
 
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Make and Model</th>
-            <th>Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="booking in bookings">
-            <td>{{ booking.name }}</td>
-            <td>{{ booking.vehicle_make_model }}</td>
-            <td>{{ formatDate(booking.booking_datetime) }}</td>
-          </tr>
-        </tbody>
-      </table>
+        <input class="form-input" v-model="formData.name" placeholder="Name" />
+        <input class="form-input" v-model="formData.email" placeholder="Email" />
+        <input class="form-input" v-model="formData.phone_number" placeholder="Phone Number" />
+        <input class="form-input" v-model="formData.vehicle_make_model" placeholder="Vehicle Make and Model" />
+        <button class="form-input form-button" @click="submit">SUBMIT</button>
     </div>
 
   </GuestLayout>
@@ -62,6 +67,33 @@
 <style scoped>
 .header {
   font-weight: 600;
-  font-size: 3em;
+  font-size: 2em;
+}
+
+.booking-form {
+    display: flex;
+    flex-direction: column;
+    padding: 2em;
+    align-items: center;
+}
+
+.datepicker {
+    margin: 0.6em 0 0.6em 0;
+    width: 100%;
+}
+
+.form-input {
+    padding: 1em;
+    border-radius: 0.5em;
+    margin: 0.6em 0 0.6em 0;
+    width: 100%;
+}
+
+.form-button {
+    color: white;
+    font-weight: 400;
+    background-color: #2a2f42;
+    width: 10em;
+    border-color: white;
 }
 </style>

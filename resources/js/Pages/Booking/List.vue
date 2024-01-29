@@ -14,7 +14,7 @@
       .then(data => bookings.value = data);
 
   watch(date, (newDate) => {
-    // refresh list result for given day
+    // refresh list result for given day, or clear date filter
     const query = newDate !== null ? '?date=' + formatDate(newDate) : '';
     fetch('/api/bookings' + query)
         .then(response => response.json())

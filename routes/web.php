@@ -29,6 +29,10 @@ Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+Route::get('/booking', function () {
+    return Inertia::render('Booking/Create');
+})->name('create');
+
 Route::get('/bookings', function () {
     return Inertia::render('Booking/List');
 })->middleware(['auth', 'verified'])->name('bookings');
