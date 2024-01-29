@@ -1,12 +1,12 @@
 <script setup>
   import { ref } from 'vue';
-  import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-  import { Head } from '@inertiajs/vue3';
+  import {Head, router} from '@inertiajs/vue3';
   import { watch } from 'vue';
   import VueDatePicker from '@vuepic/vue-datepicker';
   import '@vuepic/vue-datepicker/dist/main.css';
   import GuestLayout from "@/Layouts/GuestLayout.vue";
 
+  let confirmation = ref(null);
   const date = ref(null);
   const formData = {
       name: '',
@@ -29,8 +29,13 @@
           },
       }).then(response => response.json())
           .then(data => {
-              console.log(data);
+              confirmation.value = data;
           });
+  }
+
+  function displayDate(dateString) {
+      const date = new Date(dateString);
+      return new Intl.DateTimeFormat('default', { dateStyle: 'long', timeStyle: 'short' }).format(date);
   }
 </script>
 
@@ -38,27 +43,31 @@
   <Head title="All Bookings" />
 
   <GuestLayout>
-
-    <div class="booking-form">
+    <div v-if="confirmation === null" class="booking-form">
       <h1 class="header">Book a Slot</h1>
+      <span class="datepicker">
+        <VueDatePicker
+            v-model="date"
+            minutes-increment="30"
+            minutes-grid-increment="30"
+            :max-time="{ hours:17, minutes: 30 }"
+            :min-time="{ hours:9, minutes: 0 }"
+            placeholder="Select Date and Time"
+            :start-time="{hours: 12, minutes: 0}"
+        />
+      </span>
 
-        <span class="datepicker">
-            <VueDatePicker
-                v-model="date"
-                minutes-increment="30"
-                minutes-grid-increment="30"
-                :max-time="{ hours:17, minutes: 30 }"
-                :min-time="{ hours:9, minutes: 0 }"
-                placeholder="Select Date and Time"
-                :start-time="{hours: 12, minutes: 0}"
-            />
-        </span>
+      <input class="form-input" v-model="formData.name" placeholder="Name" />
+      <input class="form-input" v-model="formData.email" placeholder="Email" />
+      <input class="form-input" v-model="formData.phone_number" placeholder="Phone Number" />
+      <input class="form-input" v-model="formData.vehicle_make_model" placeholder="Vehicle Make and Model" />
+      <button class="form-input form-button" @click="submit">SUBMIT</button>
+    </div>
 
-        <input class="form-input" v-model="formData.name" placeholder="Name" />
-        <input class="form-input" v-model="formData.email" placeholder="Email" />
-        <input class="form-input" v-model="formData.phone_number" placeholder="Phone Number" />
-        <input class="form-input" v-model="formData.vehicle_make_model" placeholder="Vehicle Make and Model" />
-        <button class="form-input form-button" @click="submit">SUBMIT</button>
+    <div v-if="confirmation !== null" class="booking-form">
+        <h1 class="header">Thanks for your booking!</h1>
+        <p>Your booking number is: {{ confirmation ? confirmation.id : '' }}</p>
+        <p>Your slot is on {{ confirmation ? displayDate(confirmation.booking_datetime) : '' }}</p>
     </div>
 
   </GuestLayout>
@@ -67,7 +76,7 @@
 <style scoped>
 .header {
   font-weight: 600;
-  font-size: 2em;
+  font-size: 1.8em;
 }
 
 .booking-form {
