@@ -54,6 +54,7 @@
             :min-time="{ hours:9, minutes: 0 }"
             placeholder="Select Date and Time"
             :start-time="{hours: 12, minutes: 0}"
+            :disabled-week-days="[6, 0]"
         />
       </span>
 
